@@ -12,7 +12,7 @@ $numQuestions = count($NQ->askedQuestions);
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>19 Questions</title>
+    <title>19 kérdés</title>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta/css/bootstrap.min.css" integrity="sha384-/Y6pD6FV/Vv2HJnA6t+vslU6fwYXjCFtcEpHbNJ0lyAFsXTsjBbfaDjzALeQsN6M" crossorigin="anonymous">
     <link rel="stylesheet" href="assets/common.css">
     <script>var q="<?= $NQ->state ?>"</script>
@@ -26,21 +26,22 @@ $numQuestions = count($NQ->askedQuestions);
   </head>
   <body>
     <div class="container">
-      <h2>19 Questions <small class="text-secondary">you think of something, we guess it</small></h2>
+      <h2>19 kérdés <small class="text-secondary">gondolj egy állatra, megpróbálom kitalálni...</small></h2>
       <div class="jumbotron">
 <?php if (isset($_GET['wrapup']) || $numQuestions >= 40): ?>
-        <p class="display-2 text-success">You win this round!</p>
-        <h3>Were you thinking of one of these:</h3>
+        <p class="display-2 text-success">Te nyerted ezt a kört!</p>
+        <h3>Ezekből gondoltál valamire?</h3>
 <?php
 foreach ($NQ->getTopHunches() as $hunch) {
   $nameHtml = htmlspecialchars($hunch->name);
-  if (!empty($hunch->subname)) $nameHtml .= '<small>(' . htmlspecialchars($hunch->subname) . ')</small>';
+  if (!empty($hunch->subname)) $nameHtml .= '<small> (<i>' . htmlspecialchars($hunch->subname) . '</i>)</small>';
+  #if (!empty($hunch->link)) $nameHtml = "<a href='{$hunch->link}'>$nameHtml</a>";
   echo "<a class=\"btn btn-secondary\" href=\"save.php&#63;obj={$hunch->objectId}&amp;q=".$NQ->state."\">{$nameHtml}</a>\n";
 }
 ?>
 
 <hr>
-<h3>If not, please type the thing here:</h3>
+<h3>Ha nem, kérlek mondd meg mire gondoltál:</h3>
 
 <form class="form form-inline mx-auto" action="save.php" method="get">
 <input name="q" type="hidden" value="<?= $NQ->state ?>">
@@ -51,8 +52,8 @@ foreach ($NQ->getTopHunches() as $hunch) {
 <script>
 var bestPictures = new Bloodhound({
   datumTokenizer: Bloodhound.tokenizers.obj.whitespace('name'),
-  queryTokenizer: Bloodhound.tokenizers.whitespace,
-  remote: 'api/v1/objects.php?q=%QUERY'
+      queryTokenizer: Bloodhound.tokenizers.whitespace,
+      remote: 'api/v1/objects.php?q=%QUERY'
 });
 bestPictures.initialize();
 $('#theobjectname').typeahead(null, {
@@ -73,24 +74,32 @@ $('#theobjectname').typeahead(null, {
 
   if ($numQuestions >= 19)
   {
-  	echo "<div class=\"alert alert-info\"><strong>You've won this round!</strong> You can continue answering a few more questions or <a href=\"".basename($_SERVER['PHP_SELF'])."&#63;wrapup=yes&amp;q=".$NQ->state."\" class=\"btn btn-info\">tell me what you were thinking of</a> so I can learn.</div>\n";
+  	echo "<div class=\"alert alert-info\"><strong>Te nyerted ezt a kört!</strong><br>Folytathatod néhány további kérdésre válaszolva, vagy <a href=\"".basename($_SERVER['PHP_SELF'])."&#63;wrapup=yes&amp;q=".$NQ->state."\" class=\"btn btn-info\">mondd meg mire gondoltál</a> hogy tanítsál!</div>\n";
   }
 
-  echo "<p class=\"lead\"><b>#". ($numQuestions+1) ."</b> ";
+      list($text, $subtext, $choices, $link) = $NQ->getNextQuestion();
+      echo "<p class=\"lead\"><span style='font-weight:bold'>#". ($numQuestions+1) ."</span> ";
+      if (strlen($subtext)) $text .= " (<i>$subtext</i>)";
+      if (strlen($link))
+        echo "<a href='$link' target='_blank'>$text</a>? ";
+      else {
+          echo $text;
+          if (count($choices))
+              echo "?";
+          echo " ";
+        }
+  
 
-  list($text, $subtext, $choices) = $NQ->getNextQuestion();
-  if (strlen($subtext)) $text .= " ($subtext)";
-  echo "$text? ";
-
-  foreach ($choices as $choice)
-  {
-    if (preg_match('/w([0-9]+)/',$choice[1],$regs))
-      $prefix = "save.php&#63;obj={$regs[1]}&amp;q=";
-    else
-      $prefix = basename($_SERVER['PHP_SELF']).'&#63;'.(isset($_GET['debug'])?'debug&amp;':'')."q=";
-    echo "<a class=\"btn btn-outline-primary\" rel=\"nofollow\" href=\"$prefix".$choice[1]."\">".$choice[0]."</a> ";
-  }
-  echo "</p><hr />";
+      foreach ($choices as $choice)
+      {
+        if (preg_match('/w([0-9]+)/',$choice[1],$regs))
+          $prefix = "save.php&#63;obj={$regs[1]}&amp;q=";
+        else
+          $prefix = basename($_SERVER['PHP_SELF']).'&#63;'.(isset($_GET['debug'])?'debug&amp;':'')."q=";
+        echo "<a class=\"btn btn-outline-primary\" rel=\"nofollow\" href=\"$prefix".$choice[1]."\">".$choice[0]."</a> ";
+      }
+      echo "</p>";
+  echo "<hr />";
 
   foreach (array_reverse($NQ->askedQuestions) as $pastQuestion)
   {
@@ -106,7 +115,7 @@ $('#theobjectname').typeahead(null, {
 ?>
       <div class="row">
         <div class="col-md">
-          <h2>Hunches</h2>
+          <h2>Előérzetek</h2>
           <table class="table table-condensed">
 <?php
     foreach ($NQ->getTopHunches() as $hunch)
@@ -126,7 +135,7 @@ $('#theobjectname').typeahead(null, {
           </table>
         </div>
         <div class="col-md">
-          <h2>Top questions</h2>
+          <h2>Top kérdések</h2>
           <table class="table table-condensed">
 <?php
     foreach ($NQ->getBestQuestions(10) as $question) {
@@ -165,14 +174,5 @@ $('#theobjectname').typeahead(null, {
   }
 ?>
     </div>
-    <script>
-      (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
-      (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
-      m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
-      })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
-
-      ga('create', 'UA-52764-3', 'phor.net');
-      ga('send', 'pageview');
-    </script>
   </body>
 </html>

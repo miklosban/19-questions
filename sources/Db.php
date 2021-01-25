@@ -11,7 +11,8 @@ class Db extends \PDO {
         ];
 
         try {
-            parent::__construct(constant('DB_DSN'), '', '', $options);
+            #parent::__construct(constant('DB_DSN'), '', '', $options);
+            parent::__construct(constant('DB_DSN'), user, password, $options);
         } catch (\PDOException $e) {
             trigger_error($e->getMessage());
             return false;

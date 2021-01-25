@@ -24,22 +24,22 @@ if (empty($objectName)) die('Object database error');
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>19 Questions</title>
+    <title>19-et kerdezo</title>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta/css/bootstrap.min.css" integrity="sha384-/Y6pD6FV/Vv2HJnA6t+vslU6fwYXjCFtcEpHbNJ0lyAFsXTsjBbfaDjzALeQsN6M" crossorigin="anonymous">
     <link rel="stylesheet" href="assets/common.css">
-    <script>var q="<?= htmlentities($query) ?>"</script>
+    <script>var q="<?= htmlentities($_GET['q']) ?>"</script>
     <style>
       body {background: #F1EBEB; margin-top: 2em}
     </style>
   </head>
   <body>
     <div class="container">
-      <h2>19 Questions <small class="text-secondary">you think of something, we guess it</small></h2>
+      <h2>19 kérdés <small class="text-secondary">gondolj egy állatra, megpróbálom kitalálni...</small></h2>
       <div class="jumbotron">
 <?php
 if (isset ($_POST['action']) && $_POST['action'] == 'save') {
   $NQ->teach($objectID);
-  echo "<p>Thanks for playing. <a href=\"play.php\" class=\"btn btn-lg btn-primary\">Play again</a> <a href=\"index.php\" class=\"btn btn-lg btn-secondary\">Go to the 19Q homepage</a>";
+  echo "<p>Köszi, hogy játszottál. <a href=\"play.php\" class=\"btn btn-lg btn-primary\">Még egyszer!!!</a> <a href=\"index.php\" class=\"btn btn-lg btn-secondary\">Go to the 19Q homepage</a>";
   echo "<hr>";
   echo '<p>Please tell everyone you know about this project. That is how I learn.';
   echo "<p><a href=\"http://www.facebook.com/sharer.php?u=http%3A%2F%2Fgoo.gl%2F3XhDR&t=19 Questions Game\" class=\"btn btn-lg btn-success\">Share on Facebook</a>
@@ -49,11 +49,17 @@ if (isset ($_POST['action']) && $_POST['action'] == 'save') {
 ?>
         <form method="post">
           <input name="obj" value="<?= htmlentities($_GET['obj']) ?>" type="hidden">
+<?php
+    if (isset($_GET['objectname'])) {
+?>
           <input name="objectname" value="<?= htmlentities($_GET['objectname']) ?>" type="hidden">
+<?php
+    }
+?>
           <input name="q" value="<?= htmlentities($_GET['q']) ?>" type="hidden">
           <input name="action" value="save" type="hidden">
           <p class="lead">You are about to teach <b>19 Questions</b> this information about <b><?= htmlspecialchars($objectName) ?></b>.</p>
-          <input class="btn btn-lg btn-primary" type="submit" value="Teach 19 Questions"></p>
+          <input class="btn btn-lg btn-primary" type="submit" value="Tanítsd a 19-et kérdezőt"></p>
         </form>
         <hr>
 <?php
@@ -69,14 +75,5 @@ if (isset ($_POST['action']) && $_POST['action'] == 'save') {
 ?>
       </div>
     </div>
-    <script>
-      (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
-      (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
-      m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
-      })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
-
-      ga('create', 'UA-52764-3', 'phor.net');
-      ga('send', 'pageview');
-    </script>
   </body>
 </html>
